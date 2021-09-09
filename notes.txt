@@ -1,0 +1,18 @@
+cButton:
+ --custom tkinter Button
+ --write from flowchart
+
+root:
+ button singleplayer sp
+ button multiplayer mp
+ button exit
+
+sp & mp:
+ entry size --max 9x9, min 3x3, has to be same
+ button play
+ button back
+
+play game:
+ list board --len(board)=len(board[n])=size.get()
+ frame outer
+ for n in board: for b in n: cButton
