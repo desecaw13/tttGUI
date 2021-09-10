@@ -16,3 +16,7 @@ play game:
  list board --len(board)=len(board[n])=size.get()
  frame outer
  for n in board: for b in n: cButton
+
+win:
+ label winner
+ button back -- goes to root
