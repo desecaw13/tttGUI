@@ -13,8 +13,8 @@ start:
  button back
 
 game:
- list board --len(board)=len(board[n])=size.get()
- for n in board: for b in n: cButton
+ frame outer
+  list board, for x in range size: for y in range size: cButton
 
 win:
  label winner
