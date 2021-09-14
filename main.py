@@ -10,7 +10,7 @@ class cButton:
     def __init__(self, parent):
         self.parent = parent
         self.value = StringVar(parent)
-        self.button = Button(parent, textvariable=self.value, command=self.clicked)
+        self.button = Button(parent, textvariable=self.value, command=self.clicked, width=2, height=1)
 
     def clicked(self):
         if self.value.get():
@@ -20,7 +20,6 @@ class cButton:
             changeTurn(self.parent.master)
             if mode and turn.get() % 2 != 0:
                 computerTurn()
-            # todo update tkinter widgets
             return True
 
 
@@ -30,11 +29,11 @@ def changeTurn(window):
     if winner:
         openWin(winner)
         window.destroy()
-    # todo update widgets
 
 
 def computerTurn():
-    if not board[randrange(0, len(board))][randrange(0, len(board))].clicked() and not hasWon():  # opens two won ?
+    # todo fix sometimes opens two won toplevels when multiplayer and???
+    if not board[randrange(0, len(board))][randrange(0, len(board))].clicked() and not hasWon():
         computerTurn()
 
 
@@ -75,16 +74,17 @@ def hasWon():
 def openWin(winner):
     root.withdraw()
 
-    win = Toplevel(root)
-    # start.title('todo') details, add widgets
+    win = Toplevel(root, bg='#808080')
+    win.title('Game Over')
+    win.minsize(root.winfo_screenwidth()//4, root.winfo_screenheight()//4)
 
-    Label(win, text=winner).grid()
+    Label(win, bg='#F8F8F8', text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.').grid()
 
     def back():
         root.deiconify()
         turn.set(0)
         win.destroy()
-    Button(win, text='Back to menu', command=back).grid()
+    Button(win, text='Back to menu', command=back).grid(ipadx=3, ipady=3, padx=1, pady=1)
 
     win.focus_force()
 
@@ -92,13 +92,14 @@ def openWin(winner):
 def openGame(size):
     root.withdraw()
 
-    game = Toplevel(root)
-    # game.title('todo') details, add widgets
+    game = Toplevel(root, bg='#808080')
+    game.title('Playing')
     game.grid_columnconfigure(0, weight=1)
     game.grid_rowconfigure(0, weight=1)
+    game.minsize(120, 120)
 
     outer = Frame(game)
-    outer.grid(sticky=EW+NS)
+    outer.grid(padx=5, pady=5, sticky=NSEW)
 
     # setup
     global board
@@ -107,17 +108,20 @@ def openGame(size):
         for y in range(size):
             outer.grid_columnconfigure(x, weight=1)
             outer.grid_rowconfigure(y, weight=1)
-            board[x][y].button.grid(row=x, column=y, sticky=EW+NS)  # todo start as squares
+            board[x][y].button.grid(row=x, column=y, sticky=NSEW)
 
-    # testing thing for later
-    foot = Frame(game)
-    foot.grid()
-    Label(foot, text='test').grid()
+    foot = Frame(game, bg='#808080')
+    foot.grid(padx=5, pady=5)
+
+    Label(foot, bg='#F8F8F8', text='Turns:').grid()
+    Label(foot, bg='#F8F8F8', textvariable=turn).grid(row=0,  column=1)
+
+    Frame(foot, bg='#808080').grid(row=0, column=2, padx=2)
 
     def back():
         root.deiconify()
         game.destroy()
-    Button(foot, text='Back to menu', command=back).grid(row=0, column=1)
+    Button(foot, text='Back to menu', command=back).grid(row=0, column=3, ipadx=3, ipady=3)
 
     game.focus_force()
 
@@ -125,21 +129,24 @@ def openGame(size):
 def openStart():
     root.withdraw()
 
-    start = Toplevel(root)
-    # start.title('todo') details, add widgets
+    start = Toplevel(root, bg='#808080')
+    start.title('Starting...')
+    start.minsize(root.winfo_screenwidth()//6, root.winfo_screenheight()//6)
 
-    size = IntVar(start)  # empty? root?
-    Entry(start, textvariable=size).grid()  # todo set limits of 3 - 9, odd?
+    size = IntVar(start)
+    Entry(start, bg='#F8F8F8', textvariable=size).grid(row=0, column=1, ipadx=1, ipady=1, padx=5, pady=5)
+    Label(start, bg='#F8F8F8', text='Size of game \n(3 to 9)').grid(row=0, column=0, ipadx=1, ipady=1, padx=5, pady=5)
 
     def play():
+        # todo size limit of 3 - 9. warning if odd?
         openGame(size.get())
         start.destroy()
-    Button(start, text='Start game', command=play).grid()
+    Button(start, text='Start game', command=play).grid(ipadx=3, ipady=3, padx=1, pady=1, columnspan=2)
 
     def back():
         root.deiconify()
         start.destroy()
-    Button(start, text='Back to menu', command=back).grid()
+    Button(start, text='Back to menu', command=back).grid(ipadx=3, ipady=3, padx=1, pady=1, columnspan=2)
 
     start.focus_force()
 
@@ -150,12 +157,12 @@ if __name__ == '__main__':
     mode = False  # true is multiplayer
 
     root = Tk()
-    root.title('Noughts and Crosses')
     root.config(bg='#808080')
+    root.title('Noughts and Crosses')
     root.grid_columnconfigure(0, weight=1)
     root.minsize(root.winfo_screenwidth()//4, root.winfo_screenheight()//4)
 
-    # todo colors and all
+    # todo colors and all, check everything for everything
 
     Label(root, bg='#F8F8F8', text='Tic Tac Toe').grid(ipadx=1, ipady=1, padx=5, pady=5, sticky=EW)
 
@@ -171,3 +178,4 @@ if __name__ == '__main__':
     Button(root, text='Exit', command=root.destroy).grid(ipadx=3, ipady=3, padx=1, pady=1)
 
     root.mainloop()
+# todo make comments
