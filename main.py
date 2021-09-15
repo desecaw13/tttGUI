@@ -3,6 +3,7 @@
 # 9/9-/2012
 
 from tkinter import *
+import tkinter.messagebox as messagebox
 from random import randrange
 
 
@@ -19,7 +20,15 @@ class cButton:
             self.value.set('X' if turn.get() % 2 == 0 else 'Y')
             changeTurn(self.parent.master)
             if mode and turn.get() % 2 != 0:
-                computerTurn()
+                for w in self.parent.children.values():  # disables all buttons in board (parent is their frame in game)
+                    w['state'] = DISABLED
+
+                def move():
+                    for w in self.parent.children.values():  # activates those buttons
+                        w['state'] = ACTIVE
+                    computerTurn()
+
+                self.parent.after(375, move)  # sleep for .375 seconds then moves
             return True
 
 
@@ -28,13 +37,14 @@ def changeTurn(window):
     winner = hasWon()
     if winner:
         openWin(winner)
+        turn.trace_remove('write', window.cbn)
         window.destroy()
 
 
 def computerTurn():
-    # todo fix sometimes opens two won toplevels when multiplayer and???
-    if not board[randrange(0, len(board))][randrange(0, len(board))].clicked() and not hasWon():
-        computerTurn()
+    if not hasWon():
+        if not board[randrange(0, len(board))][randrange(0, len(board))].clicked():
+            computerTurn()
 
 
 def hasWon():
@@ -76,15 +86,19 @@ def openWin(winner):
 
     win = Toplevel(root, bg='#808080')
     win.title('Game Over')
-    win.minsize(root.winfo_screenwidth()//4, root.winfo_screenheight()//4)
+    win.grid_columnconfigure(0, weight=1)
+    win.minsize(root.winfo_screenwidth()//4, root.winfo_screenheight()//4)  # 3?
 
-    Label(win, bg='#F8F8F8', text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.').grid()
+    Label(win, bg='#F8F8F8', relief=SOLID, bd=1, text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.')\
+        .grid(ipadx=3, ipady=3, padx=5, pady=5)
+
+    c = Canvas(win).grid()
 
     def back():
         root.deiconify()
         turn.set(0)
         win.destroy()
-    Button(win, text='Back to menu', command=back).grid(ipadx=3, ipady=3, padx=1, pady=1)
+    Button(win, text='Back to menu', command=back).grid(ipadx=3, ipady=3, padx=5, pady=5)
 
     win.focus_force()
 
@@ -113,15 +127,18 @@ def openGame(size):
     foot = Frame(game, bg='#808080')
     foot.grid(padx=5, pady=5)
 
-    Label(foot, bg='#F8F8F8', text='Turns:').grid()
-    Label(foot, bg='#F8F8F8', textvariable=turn).grid(row=0,  column=1)
+    t_l = Label(foot, text="X's turn", bg='#F8F8F8')
+    t_l.grid()
+    game.cbn = turn.trace_add('write', lambda *args: t_l.config(text=f"{'X' if turn.get() % 2 == 0 else 'Y'}'s turn"))
 
-    Frame(foot, bg='#808080').grid(row=0, column=2, padx=2)
+    Frame(foot, bg='#808080').grid(row=0, column=1, padx=2)
 
     def back():
         root.deiconify()
+        turn.set(0)
+        turn.trace_remove('write', game.cbn)
         game.destroy()
-    Button(foot, text='Back to menu', command=back).grid(row=0, column=3, ipadx=3, ipady=3)
+    Button(foot, text='Back to menu', command=back).grid(row=0, column=2, ipadx=3, ipady=3)
 
     game.focus_force()
 
@@ -138,9 +155,12 @@ def openStart():
     Label(start, bg='#F8F8F8', text='Size of game \n(3 to 9)').grid(row=0, column=0, ipadx=1, ipady=1, padx=5, pady=5)
 
     def play():
-        # todo size limit of 3 - 9. warning if odd?
-        openGame(size.get())
-        start.destroy()
+        try:
+            size.set(max(min(size.get(), 9), 3))  # enforces a 3-9 size limit
+            openGame(size.get())
+            start.destroy()
+        except TclError:
+            messagebox.showerror('Bad Input', 'Use a number.')
     Button(start, text='Start game', command=play).grid(ipadx=3, ipady=3, padx=1, pady=1, columnspan=2)
 
     def back():
@@ -161,8 +181,6 @@ if __name__ == '__main__':
     root.title('Noughts and Crosses')
     root.grid_columnconfigure(0, weight=1)
     root.minsize(root.winfo_screenwidth()//4, root.winfo_screenheight()//4)
-
-    # todo colors and all, check everything for everything
 
     Label(root, bg='#F8F8F8', text='Tic Tac Toe').grid(ipadx=1, ipady=1, padx=5, pady=5, sticky=EW)
 
