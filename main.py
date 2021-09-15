@@ -1,6 +1,6 @@
 # Joe Olpin
 # GUI Tic Tac Toe
-# 9/9-/2012
+# 9/9-17/2012
 
 from tkinter import *
 import tkinter.messagebox as messagebox
@@ -92,7 +92,13 @@ def openWin(winner):
     Label(win, bg='#F8F8F8', relief=SOLID, bd=1, text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.')\
         .grid(ipadx=3, ipady=3, padx=5, pady=5)
 
-    c = Canvas(win).grid()
+    c = Canvas(win)  # todo
+    c.grid()
+
+    c.create_line(1+2,3+2, 1+2,3+2)
+    c.create_line(1+2,4+2, 1+2,4+2)
+    c.create_line(3+2,1+2, 3+2,1+2)
+    c.create_line(4+2,1+2, 4+2,1+2)
 
     def back():
         root.deiconify()
