@@ -54,7 +54,7 @@ def hasWon():
                 if board[x][y].value.get() != s:
                     break
                 if y == len(board)-1:
-                    return s
+                    return s, HORIZONTAL, x  # todo finish
 
         for y in range(len(board)):
             for x in range(len(board)):
@@ -87,24 +87,32 @@ def openWin(winner):
     win = Toplevel(root, bg='#808080')
     win.title('Game Over')
     win.grid_columnconfigure(0, weight=1)
-    win.minsize(root.winfo_screenwidth()//4, root.winfo_screenheight()//4)  # 3?
+    win.minsize(root.winfo_screenwidth()//3, root.winfo_screenheight()//3)
 
     Label(win, bg='#F8F8F8', relief=SOLID, bd=1, text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.')\
-        .grid(ipadx=3, ipady=3, padx=5, pady=5)
+        .grid(ipadx=3, ipady=3, padx=5, pady=5, sticky=EW)
 
-    c = Canvas(win)  # todo
+    c = Canvas(win, width=100, height=100)
     c.grid()
 
-    c.create_line(1+2,3+2, 1+2,3+2)
-    c.create_line(1+2,4+2, 1+2,4+2)
-    c.create_line(3+2,1+2, 3+2,1+2)
-    c.create_line(4+2,1+2, 4+2,1+2)
+    c.create_line(35,2, 35,102)
+    c.create_line(68,2, 68,102)
+    c.create_line(2,35, 102,35)
+    c.create_line(2,68, 102,68)
+
+    # if h:  # todo
+    #     draw h line on row
+    # elif v:
+    #     draw v line on col
+    # else:
+    #     draw tie
 
     def back():
         root.deiconify()
         turn.set(0)
         win.destroy()
-    Button(win, text='Back to menu', command=back).grid(ipadx=3, ipady=3, padx=5, pady=5)
+    Button(win, bg='#F0B070', activebackground='#FFBF7F', relief=FLAT, text='Back to menu', command=back)\
+        .grid(ipadx=3, ipady=3, padx=5, pady=5)
 
     win.focus_force()
 
@@ -131,10 +139,11 @@ def openGame(size):
             board[x][y].button.grid(row=x, column=y, sticky=NSEW)
 
     foot = Frame(game, bg='#808080')
-    foot.grid(padx=5, pady=5)
+    foot.grid_columnconfigure(1, weight=1)
+    foot.grid(padx=5, pady=5, sticky=EW)
 
     t_l = Label(foot, text="X's turn", bg='#F8F8F8')
-    t_l.grid()
+    t_l.grid(sticky=W)
     game.cbn = turn.trace_add('write', lambda *args: t_l.config(text=f"{'X' if turn.get() % 2 == 0 else 'Y'}'s turn"))
 
     Frame(foot, bg='#808080').grid(row=0, column=1, padx=2)
@@ -144,7 +153,8 @@ def openGame(size):
         turn.set(0)
         turn.trace_remove('write', game.cbn)
         game.destroy()
-    Button(foot, text='Back to menu', command=back).grid(row=0, column=2, ipadx=3, ipady=3)
+    Button(foot, bg='#F0B070', activebackground='#FFBF7F', relief=FLAT, text='Back to menu', command=back)\
+        .grid(row=0, column=2, ipadx=3, ipady=3, sticky=E)
 
     game.focus_force()
 
@@ -154,11 +164,16 @@ def openStart():
 
     start = Toplevel(root, bg='#808080')
     start.title('Starting...')
+    start.grid_columnconfigure(0, weight=1)
+    start.grid_rowconfigure(0, weight=1)
     start.minsize(root.winfo_screenwidth()//6, root.winfo_screenheight()//6)
 
+    f = Frame(start, bg='#808080')
+    f.grid()
+
     size = IntVar(start)
-    Entry(start, bg='#F8F8F8', textvariable=size).grid(row=0, column=1, ipadx=1, ipady=1, padx=5, pady=5)
-    Label(start, bg='#F8F8F8', text='Size of game \n(3 to 9)').grid(row=0, column=0, ipadx=1, ipady=1, padx=5, pady=5)
+    Entry(f, bg='#F8F8F8', textvariable=size).grid(row=0, column=1, ipadx=1, ipady=1, padx=5, pady=5)
+    Label(f, bg='#F8F8F8', text='Size of game \n(3 to 9)').grid(row=0, column=0, ipadx=1, ipady=1, padx=5, pady=5)
 
     def play():
         try:
@@ -167,12 +182,14 @@ def openStart():
             start.destroy()
         except TclError:
             messagebox.showerror('Bad Input', 'Use a number.')
-    Button(start, text='Start game', command=play).grid(ipadx=3, ipady=3, padx=1, pady=1, columnspan=2)
+    Button(f, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Start game', command=play)\
+        .grid(ipadx=3, ipady=3, padx=3, pady=3, columnspan=2)
 
     def back():
         root.deiconify()
         start.destroy()
-    Button(start, text='Back to menu', command=back).grid(ipadx=3, ipady=3, padx=1, pady=1, columnspan=2)
+    Button(f, bg='#F0B070', activebackground='#FFBF7F', relief=FLAT, text='Back to menu', command=back)\
+        .grid(ipadx=3, ipady=3, padx=3, pady=3, columnspan=2)
 
     start.focus_force()
 
@@ -196,10 +213,13 @@ if __name__ == '__main__':
         global mode
         mode = m
         openStart()
-    Button(root, text='Single player', command=lambda: begin(False)).grid(ipadx=3, ipady=3, padx=1, pady=1)
-    Button(root, text='Multiplayer', command=lambda: begin(True)).grid(ipadx=3, ipady=3, padx=1, pady=1)
+    Button(root, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Single player', command=lambda: begin(False))\
+        .grid(ipadx=3, ipady=3, padx=3, pady=3)
+    Button(root, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Multiplayer', command=lambda: begin(True))\
+        .grid(ipadx=3, ipady=3, padx=3, pady=3)
 
-    Button(root, text='Exit', command=root.destroy).grid(ipadx=3, ipady=3, padx=1, pady=1)
+    Button(root, bg='#F0B070', activebackground='#FFBF7F', relief=FLAT, text='Exit', command=root.destroy)\
+        .grid(ipadx=3, ipady=3, padx=3, pady=3)
 
     root.mainloop()
-# todo make comments
+# todo make comments, flip modes sp & mp
