@@ -43,18 +43,18 @@ def changeTurn(window):
 
 def computerTurn():
     if not hasWon():
-        if not board[randrange(0, len(board))][randrange(0, len(board))].clicked():
+        if not board[randrange(0, len(board))][randrange(0, len(board))].clicked():  # makes random moves until one is valid
             computerTurn()
 
 
-def hasWon():
+def hasWon():  # determines if someone won and who
     for s in ('X', 'Y'):
         for x in range(len(board)):
             for y in range(len(board)):
                 if board[x][y].value.get() != s:
                     break
                 if y == len(board)-1:
-                    return s, HORIZONTAL, x  # todo finish
+                    return s
 
         for y in range(len(board)):
             for x in range(len(board)):
@@ -87,25 +87,10 @@ def openWin(winner):
     win = Toplevel(root, bg='#808080')
     win.title('Game Over')
     win.grid_columnconfigure(0, weight=1)
-    win.minsize(root.winfo_screenwidth()//3, root.winfo_screenheight()//3)
+    win.minsize(root.winfo_screenwidth()//5, root.winfo_screenheight()//5)
 
     Label(win, bg='#F8F8F8', relief=SOLID, bd=1, text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.')\
         .grid(ipadx=3, ipady=3, padx=5, pady=5, sticky=EW)
-
-    c = Canvas(win, width=100, height=100)
-    c.grid()
-
-    c.create_line(35,2, 35,102)
-    c.create_line(68,2, 68,102)
-    c.create_line(2,35, 102,35)
-    c.create_line(2,68, 102,68)
-
-    # if h:  # todo
-    #     draw h line on row
-    # elif v:
-    #     draw v line on col
-    # else:
-    #     draw tie
 
     def back():
         root.deiconify()
@@ -131,12 +116,12 @@ def openGame(size):
 
     # setup
     global board
-    board = [[cButton(outer) for _ in range(size)] for __ in range(size)]
+    board = [[cButton(outer) for _ in range(size)] for __ in range(size)] # creates the 2d list
     for x in range(size):
         for y in range(size):
             outer.grid_columnconfigure(x, weight=1)
             outer.grid_rowconfigure(y, weight=1)
-            board[x][y].button.grid(row=x, column=y, sticky=NSEW)
+            board[x][y].button.grid(row=x, column=y, sticky=NSEW) # puts the buttons on the screen and makes then scale with the window
 
     foot = Frame(game, bg='#808080')
     foot.grid_columnconfigure(1, weight=1)
@@ -144,7 +129,7 @@ def openGame(size):
 
     t_l = Label(foot, text="X's turn", bg='#F8F8F8')
     t_l.grid(sticky=W)
-    game.cbn = turn.trace_add('write', lambda *args: t_l.config(text=f"{'X' if turn.get() % 2 == 0 else 'Y'}'s turn"))
+    game.cbn = turn.trace_add('write', lambda *args: t_l.config(text=f"{'X' if turn.get() % 2 == 0 else 'Y'}'s turn"))  # keeps track of who's turn it is and displays that
 
     Frame(foot, bg='#808080').grid(row=0, column=1, padx=2)
 
@@ -176,7 +161,7 @@ def openStart():
     Label(f, bg='#F8F8F8', text='Size of game \n(3 to 9)').grid(row=0, column=0, ipadx=1, ipady=1, padx=5, pady=5)
 
     def play():
-        try:
+        try:  # handles error for input
             size.set(max(min(size.get(), 9), 3))  # enforces a 3-9 size limit
             openGame(size.get())
             start.destroy()
@@ -213,13 +198,12 @@ if __name__ == '__main__':
         global mode
         mode = m
         openStart()
-    Button(root, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Single player', command=lambda: begin(False))\
+    Button(root, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Single player', command=lambda: begin(True))\
         .grid(ipadx=3, ipady=3, padx=3, pady=3)
-    Button(root, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Multiplayer', command=lambda: begin(True))\
+    Button(root, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Multiplayer', command=lambda: begin(False))\
         .grid(ipadx=3, ipady=3, padx=3, pady=3)
 
     Button(root, bg='#F0B070', activebackground='#FFBF7F', relief=FLAT, text='Exit', command=root.destroy)\
         .grid(ipadx=3, ipady=3, padx=3, pady=3)
 
     root.mainloop()
-# todo make comments, flip modes sp & mp
