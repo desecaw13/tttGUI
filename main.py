@@ -7,22 +7,26 @@ import tkinter.messagebox as messagebox
 from random import randrange
 
 
+# handles a tkinter Button, its clicked command and a StringVar value that is the value of the button's text
 class cButton:
+    # creates an instance and its button and its value
     def __init__(self, parent):
         self.parent = parent
         self.value = StringVar(parent)
         self.button = Button(parent, textvariable=self.value, command=self.clicked, width=2, height=1)
 
+    # sets the value if it's empty then handles computers turn if singleplayer
     def clicked(self):
         if self.value.get():
             return False
         else:
-            self.value.set('X' if turn.get() % 2 == 0 else 'Y')
+            self.value.set('X' if turn.get() % 2 == 0 else 'O')
             changeTurn(self.parent.master)
             if mode and turn.get() % 2 != 0:
                 for w in self.parent.children.values():  # disables all buttons in board (parent is their frame in game)
                     w['state'] = DISABLED
 
+                # function for parent.after()
                 def move():
                     for w in self.parent.children.values():  # activates those buttons
                         w['state'] = ACTIVE
@@ -32,6 +36,7 @@ class cButton:
             return True
 
 
+# adds 1 to turn and checks for wins and handles them
 def changeTurn(window):
     turn.set(turn.get() + 1)
     winner = hasWon()
@@ -41,14 +46,16 @@ def changeTurn(window):
         window.destroy()
 
 
+# makes random moves until one is valid
 def computerTurn():
     if not hasWon():
-        if not board[randrange(0, len(board))][randrange(0, len(board))].clicked():  # makes random moves until one is valid
+        if not board[randrange(0, len(board))][randrange(0, len(board))].clicked():
             computerTurn()
 
 
-def hasWon():  # determines if someone won and who
-    for s in ('X', 'Y'):
+# determines if someone won and who
+def hasWon():
+    for s in ('X', 'O'):
         for x in range(len(board)):
             for y in range(len(board)):
                 if board[x][y].value.get() != s:
@@ -81,6 +88,7 @@ def hasWon():  # determines if someone won and who
     return False
 
 
+# the win screen: displays who won
 def openWin(winner):
     root.withdraw()
 
@@ -92,6 +100,7 @@ def openWin(winner):
     Label(win, bg='#F8F8F8', relief=SOLID, bd=1, text='There was a tie.' if winner == 'Tie' else f'{winner} won the game.')\
         .grid(ipadx=3, ipady=3, padx=5, pady=5, sticky=EW)
 
+    # brings user back to root window
     def back():
         root.deiconify()
         turn.set(0)
@@ -102,6 +111,7 @@ def openWin(winner):
     win.focus_force()
 
 
+# the game screen: displays the buttons in board
 def openGame(size):
     root.withdraw()
 
@@ -116,12 +126,12 @@ def openGame(size):
 
     # setup
     global board
-    board = [[cButton(outer) for _ in range(size)] for __ in range(size)] # creates the 2d list
+    board = [[cButton(outer) for _ in range(size)] for __ in range(size)]  # creates the 2d list
     for x in range(size):
         for y in range(size):
             outer.grid_columnconfigure(x, weight=1)
             outer.grid_rowconfigure(y, weight=1)
-            board[x][y].button.grid(row=x, column=y, sticky=NSEW) # puts the buttons on the screen and makes then scale with the window
+            board[x][y].button.grid(row=x, column=y, sticky=NSEW)  # puts the buttons on the screen and makes then scale with the window
 
     foot = Frame(game, bg='#808080')
     foot.grid_columnconfigure(1, weight=1)
@@ -129,10 +139,12 @@ def openGame(size):
 
     t_l = Label(foot, text="X's turn", bg='#F8F8F8')
     t_l.grid(sticky=W)
-    game.cbn = turn.trace_add('write', lambda *args: t_l.config(text=f"{'X' if turn.get() % 2 == 0 else 'Y'}'s turn"))  # keeps track of who's turn it is and displays that
+    game.cbn = turn.trace_add('write', lambda *args: t_l.config(text=f"{'X' if turn.get() % 2 == 0 else 'O'}'s turn"))
+    # ^ keeps track of who's turn it is and displays that
 
     Frame(foot, bg='#808080').grid(row=0, column=1, padx=2)
 
+    # brings user back to root window
     def back():
         root.deiconify()
         turn.set(0)
@@ -144,6 +156,7 @@ def openGame(size):
     game.focus_force()
 
 
+# the start
 def openStart():
     root.withdraw()
 
@@ -160,6 +173,7 @@ def openStart():
     Entry(f, bg='#F8F8F8', textvariable=size).grid(row=0, column=1, ipadx=1, ipady=1, padx=5, pady=5)
     Label(f, bg='#F8F8F8', text='Size of game \n(3 to 9)').grid(row=0, column=0, ipadx=1, ipady=1, padx=5, pady=5)
 
+    # validates input for size and it's Entry, then begins the game
     def play():
         try:  # handles error for input
             size.set(max(min(size.get(), 9), 3))  # enforces a 3-9 size limit
@@ -170,6 +184,7 @@ def openStart():
     Button(f, bg='#70B0F0', activebackground='#7FBFFF', relief=FLAT, text='Start game', command=play)\
         .grid(ipadx=3, ipady=3, padx=3, pady=3, columnspan=2)
 
+    # brings user back to root window
     def back():
         root.deiconify()
         start.destroy()
@@ -194,6 +209,7 @@ if __name__ == '__main__':
 
     turn = IntVar(root)
 
+    # sets the mode and starts the next window
     def begin(m):
         global mode
         mode = m
