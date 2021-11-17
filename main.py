@@ -1,6 +1,3 @@
-# Joe Olpin
-# GUI Tic Tac Toe
-# 9/9-17/2012
 
 from tkinter import *
 import tkinter.messagebox as messagebox
